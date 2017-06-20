@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"strings"
 )
 
 // Pattern - a pattern can be added to a song, each pattern can have
@@ -92,6 +91,7 @@ func (s *Song) Play(step int) (out string, column int) {
 }
 
 func (s *Song) printHeaders() (out string) {
+	out = fmt.Sprintf("%7s   \n", " ")
 	for _, pat := range s.Patterns {
 		out += fmt.Sprintf("%7s: |\n", pat.Name)
 	}
@@ -152,16 +152,18 @@ func (s *Song) playStep(step int) (out string, column int) {
 		} else {
 			xOrUnderscore = "_"
 		}
-		out += fmt.Sprintf("%s%s|", moveCursor(row+1, column), xOrUnderscore)
-		lastRow = row
+		out += fmt.Sprintf("%s%s|", moveCursor(row+2, column), xOrUnderscore)
+		lastRow = row + 1
 		//fmt.Printf("\033[%d;%dH%d\n", row+10, 1, step%pat.Duration)
 	}
 
 	// I also want a cursor (*) under the current beat column
 	// because we wrap over the steps when they get > maxDur
+	// and a heading for each step (normalized in 8 steps)
 	//
 	// Example:
 	//
+	//         1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8
 	//  Kick: |X|_|_|_|X|_|_|_|X|_|_|_|X|_|_|_|
 	// Snare: |_|_|_|_|X|_|_|_|_|_|_|_|X|_|_|_|
 	// HiHat: |_|_|X|_|_|_|X|_|_|_|X|_|_|_|X|_|
@@ -172,8 +174,7 @@ func (s *Song) playStep(step int) (out string, column int) {
 	// >> Column: 33
 	//
 	maxColumns := headerLength + (2 * maxDur)
-	leftPad := strings.Repeat(" ", column-1)
-	rightPad := strings.Repeat(" ", maxColumns-column)
-	cursor := fmt.Sprintf("%s%s", moveCursor(lastRow+2, 1), leftPad+"*"+rightPad)
-	return out + cursor, column
+	head := header(column-1, stepNorm)
+	foot := footer(maxColumns, column, lastRow+2)
+	return head + out + foot, column
 }
