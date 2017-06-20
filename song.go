@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 // Pattern - a pattern can be added to a song, each pattern can have
@@ -39,6 +40,18 @@ func NewSong(t string, tempo int) *Song {
 		Name:  title,
 		Tempo: tempo,
 	}
+}
+
+// MaxPatDur - gets the max length of a pattern
+func (s *Song) MaxPatDur() int {
+	pats := make([]int, len(s.Patterns))
+	i := 0
+	for _, p := range s.Patterns {
+		pats[i] = p.Duration
+		i++
+	}
+	sort.Ints(pats)
+	return pats[len(pats)-1]
 }
 
 // AddPattern - adds a specific beat pattern to existing song
@@ -87,20 +100,21 @@ func (s *Song) printHeaders() (out string) {
 
 func (s *Song) playStep(step int) (out string, column int) {
 	var headerLength = 10
-	format := "\033[%d;%dH%s\033[%d;%dH|"
 
-	// The escape seq: \033[1;1H = moves cursor to row=1, col=1
+	// normilze step over maximum pattern length
+	maxDur := s.MaxPatDur()
+	stepNorm := step % maxDur
+	if stepNorm == 0 {
+		stepNorm = maxDur
+	}
+
+	// The escape seq: \033[1;1H is produced by moveCursor(row,column)
 	//                      ^ ^
 	//                      ^ col
 	//                      ^
 	//                      row
 	//
-	// see: https://en.wikipedia.org/wiki/ANSI_escape_code#Sequence_elements
-	//      https://stackoverflow.com/questions/15442292/golang-how-to-have-an-inplace-string-that-updates-at-stdout
-	//
-	// So in the above format we are escaping twice:
-	//      1) the single char string (_ or X)
-	//      2) and the seperator (|)
+	// in the above example it's job is to move cursor to row=1, col=1
 	//
 	// Each column is caluculated as follows:
 	//
@@ -120,23 +134,46 @@ func (s *Song) playStep(step int) (out string, column int) {
 	//          (11*2)+10-1=31
 	//
 	switch {
-	case step == 1:
+	case stepNorm == 1:
 		column = headerLength + 1
-	case step >= 2:
-		column = headerLength + (2 * step) - 1
+	case stepNorm >= 2:
+		column = headerLength + (2 * stepNorm) - 1
 	}
 
+	var lastRow int
+	var xOrUnderscore string
 	for row, pat := range s.Patterns {
-		key := step % (pat.Duration)
+		key := stepNorm % pat.Duration
 		if key == 0 {
 			key = pat.Duration
 		}
 		if _, ok := pat.Beats[key]; ok {
-			out += fmt.Sprintf(format, row+1, column, "X", row+1, column+1)
+			xOrUnderscore = "X"
 		} else {
-			out += fmt.Sprintf(format, row+1, column, "_", row+1, column+1)
+			xOrUnderscore = "_"
 		}
+		out += fmt.Sprintf("%s%s|", moveCursor(row+1, column), xOrUnderscore)
+		lastRow = row
 		//fmt.Printf("\033[%d;%dH%d\n", row+10, 1, step%pat.Duration)
 	}
-	return out, column
+
+	// I also want a cursor (*) under the current beat column
+	// because we wrap over the steps when they get > maxDur
+	//
+	// Example:
+	//
+	//  Kick: |X|_|_|_|X|_|_|_|X|_|_|_|X|_|_|_|
+	// Snare: |_|_|_|_|X|_|_|_|_|_|_|_|X|_|_|_|
+	// HiHat: |_|_|X|_|_|_|X|_|_|_|X|_|_|_|X|_|
+	// HiTom: |_|_|_|_|_|X|_|_|_|_|_|X|_|_|_|X|
+	// 			     *
+	//
+	// >> Step: 44
+	// >> Column: 33
+	//
+	maxColumns := headerLength + (2 * maxDur)
+	leftPad := strings.Repeat(" ", column-1)
+	rightPad := strings.Repeat(" ", maxColumns-column)
+	cursor := fmt.Sprintf("%s%s", moveCursor(lastRow+2, 1), leftPad+"*"+rightPad)
+	return out + cursor, column
 }

@@ -44,13 +44,13 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Run()
 
-	for i := 1; i <= bpm; i++ {
+	for i := 1; i <= song.MaxPatDur()*4; i++ {
 		beats, column := song.Play(i)
 		fmt.Printf("%s", beats)
 		fmt.Printf("\n\n>> Step: %d\n", i)
 		fmt.Printf(">> Column: %d\n", column)
 		sec := (((60.0 / float64(bpm)) * 4.0) / 8.0)
-		fmt.Println(sec)
+		fmt.Printf(">> Duration: %.2f sec\n", sec)
 		dur := time.Duration(sec*1000000) * time.Microsecond
 		time.Sleep(dur)
 	}

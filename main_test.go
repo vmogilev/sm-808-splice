@@ -71,6 +71,35 @@ var testNewSongCases = []struct {
 	},
 }
 
+var testSongMaxDurCases = []struct {
+	song *Song
+	want int
+}{
+	{
+		&Song{
+			Name:  "One",
+			Tempo: 70,
+			Patterns: []Pattern{
+				Pattern{Name: "1", Beats: map[int]int{15: 1, 7: 1, 11: 1, 3: 1}, Duration: 16},
+				Pattern{Name: "2", Beats: map[int]int{1: 1, 2: 1, 6: 1}, Duration: 8},
+			},
+		},
+		16,
+	},
+	{
+		&Song{
+			Name:  "Two",
+			Tempo: 70,
+			Patterns: []Pattern{
+				Pattern{Name: "1", Beats: map[int]int{15: 1, 7: 1, 11: 1, 3: 1}, Duration: 16},
+				Pattern{Name: "2", Beats: map[int]int{1: 1, 2: 1, 6: 1}, Duration: 8},
+				Pattern{Name: "3", Beats: map[int]int{1: 1, 2: 1, 6: 1, 28: 1}, Duration: 32},
+			},
+		},
+		32,
+	},
+}
+
 var testPatternCases = []struct {
 	songIn  *Song
 	name    string
@@ -120,6 +149,14 @@ var testPatternCases = []struct {
 			},
 		},
 	},
+}
+
+func TestSongMaxDur(t *testing.T) {
+	for _, test := range testSongMaxDurCases {
+		if out := test.song.MaxPatDur(); out != test.want {
+			t.Fatalf("In: %v Want: %d Got: %d", test.song, test.want, out)
+		}
+	}
 }
 
 func TestSongTitle(t *testing.T) {
