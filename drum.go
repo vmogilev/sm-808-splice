@@ -1,96 +1,58 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
-	"strconv"
-	"strings"
+	"os/exec"
+	"time"
 )
 
-// Pattern - a pattern can be added to a song, each pattern can have
-// any number of beats assigned as a map of step ID to int values measuring
-// velocity as follows:
-//
-//      step[1] = 0 - no beat - skip
-//      step[2] = 1 - one beat at velocity 1
-//      step[3] = 2 - one beat at velocity 2
-//      step[n] = n - one beat at velocity n
-//      ...
-//
-// File is an optinal sound file to play
-type Pattern struct {
-	Name  string
-	Beats map[int]int // Map of beats velocity for each step of a pattern
-	File  string      // Optional sound file to play
-}
-
-// Song is a collection of patterns under one name and tempo (measured in bpm)
-type Song struct {
-	Name     string
-	Patterns []Pattern
-	Tempo    int
-}
-
-const defaultBpm = 128
-const defaultSongName = "Four-on-the-floor"
-
 func main() {
+	var title string
 	var bpm int
 	var err error
+
 	for {
-		fmt.Printf("\tEnter Tempo (bpm):")
+		fmt.Printf("\tEnter Song Title (Default: %s): ", defaultSongName)
+		if title, err = parseTitle(os.Stdin); err == nil {
+			break
+		}
+		fmt.Printf("\t\t ** %s **\n", err.Error())
+	}
+	fmt.Printf("\t> Your cool song is \"%s\"\n", title)
+
+	for {
+		fmt.Printf("\tEnter Tempo (Default: %dbpm): ", defaultBpm)
 		if bpm, err = parseTempo(os.Stdin); err == nil {
 			break
 		}
 		fmt.Printf("\t\t ** %s **\n", err.Error())
 	}
-	fmt.Printf("Using %d BPM ...\n", bpm)
-}
+	fmt.Printf("\t> Using %d BPM ...\n", bpm)
 
-// NewSong - creates a new song with a default title if none provided
-func NewSong(t string, tempo int) *Song {
-	title := t
-	if title == "" {
-		title = defaultSongName
-	}
-	return &Song{
-		Name:  title,
-		Tempo: tempo,
-	}
-}
+	song := NewSong(title, bpm)
+	kick := map[int]int{1: 1, 5: 1}
+	snare := map[int]int{5: 1}
+	hihat := map[int]int{3: 1, 7: 1}
+	hitom := map[int]int{6: 1, 12: 1, 16: 1}
+	song.AddPattern("Kick", kick)
+	song.AddPattern("Snare", snare)
+	song.AddPattern("HiHat", hihat)
+	song.AddPattern("HiTom", hitom)
 
-// AddPattern - adds a specific beat pattern to existing song
-func (s *Song) AddPattern(name string, beats map[int]int) {
-	pat := Pattern{
-		Name:  name,
-		Beats: beats,
-	}
-	s.Patterns = append(s.Patterns, pat)
-}
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 
-func parseTempo(r io.Reader) (int, error) {
-	var bpm int
-	var err error
-	var bpmStr string
-
-	reader := bufio.NewReader(r)
-	bpmStr, _ = reader.ReadString('\n')
-	bpmStr = strings.TrimSpace(bpmStr)
-
-	if len(bpmStr) == 0 {
-		return defaultBpm, nil
+	for i := 1; i <= bpm; i++ {
+		beats, column := song.Play(i)
+		fmt.Printf("%s", beats)
+		fmt.Printf("\n\n>> Step: %d\n", i)
+		fmt.Printf(">> Column: %d\n", column)
+		sec := (((60.0 / float64(bpm)) * 4.0) / 8.0)
+		fmt.Println(sec)
+		dur := time.Duration(sec*1000000) * time.Microsecond
+		time.Sleep(dur)
 	}
 
-	bpm, err = strconv.Atoi(bpmStr)
-	if err != nil {
-		return 0, tempoNotNumber
-	}
-
-	if bpm < 60 || bpm > 128 {
-		return 0, tempoRange
-	}
-
-	return bpm, nil
 }
