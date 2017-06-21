@@ -102,6 +102,60 @@ var testPatternCases = []struct {
 	},
 }
 
+var testSongPlayCases = []struct {
+	song *Song
+	step int
+	want string
+}{
+	{
+		&Song{
+			Name:  "Four On The Floor",
+			Tempo: 70,
+			Patterns: []Pattern{
+				Pattern{Name: "Kick", Beats: map[int]int{1: 1, 5: 1}, Duration: 8},
+				Pattern{Name: "Snare", Beats: map[int]int{5: 1}, Duration: 8},
+				Pattern{Name: "HiHat", Beats: map[int]int{3: 1, 7: 1}, Duration: 8},
+			},
+		},
+		4,
+		"\033[1;16H 4 \033[2;17H_|\033[3;17H_|\033[4;17H_|\033[5;1H                *         ",
+	},
+	{
+		&Song{
+			Name:  "Four On The Floor",
+			Tempo: 70,
+			Patterns: []Pattern{
+				Pattern{Name: "Kick", Beats: map[int]int{1: 1, 5: 1}, Duration: 8},
+				Pattern{Name: "Snare", Beats: map[int]int{5: 1}, Duration: 8},
+				Pattern{Name: "HiHat", Beats: map[int]int{3: 1, 7: 1}, Duration: 8},
+			},
+		},
+		1,
+		"          \n   Kick: |\n  Snare: |\n  HiHat: |\n\033[1;10H 1 \033[2;11HX|\033[3;11H_|\033[4;11H_|\033[5;1H          *               ",
+	},
+	{
+		&Song{
+			Name:  "Four On The Floor",
+			Tempo: 70,
+			Patterns: []Pattern{
+				Pattern{Name: "Kick", Beats: map[int]int{1: 1, 5: 1}, Duration: 8},
+				Pattern{Name: "Snare", Beats: map[int]int{5: 1}, Duration: 8},
+				Pattern{Name: "HiHat", Beats: map[int]int{3: 1, 7: 1}, Duration: 8},
+			},
+		},
+		8,
+		"\033[1;24H 8 \033[2;25H_|\033[3;25H_|\033[4;25H_|\033[5;1H                        * ",
+	},
+}
+
+func TestSongPlay(t *testing.T) {
+	for _, test := range testSongPlayCases {
+		if got, _ := test.song.Play(test.step); got != test.want {
+			t.Fatalf("song.Play(step=%d) Want: %q Got: %q", test.step, test.want, got)
+		}
+	}
+}
+
 func TestSongMaxDur(t *testing.T) {
 	for _, test := range testSongMaxDurCases {
 		if out := test.song.MaxPatDur(); out != test.want {
