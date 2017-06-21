@@ -8,7 +8,7 @@ Few notes about this implementation:
 
 * It's a rotating pattern grid with a moving cursor underneath it to indicate which step the drum machine is currently on.  It's using terminal escape sequences to position the cursor - see `song.go` - `playStep()`.
 * Supports mixing patterns of different durations (8, 16, 32 steps) and repeats the shorter pattern matching the length of the longest duration.
-* Supports specifying a velocity via Pattern's Beats map of steps to velocity.  See example below - where a `snare` has a velocity of `3` at `13th` step, while all other patterns and steps have a default velocity of `1`:
+* Supports specifying a velocity via `Pattern.Beats` which is a map of steps to velocity.  See example below - where a `snare` has a velocity of `3` at `13th` step, while all other patterns and steps have a default velocity of `1`:
 
         song := NewSong(title, bpm)
         kick := map[int]int{1: 1, 5: 1}
