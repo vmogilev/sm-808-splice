@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-var testMoveCursonCases = []struct {
+var testMoveCursorCases = []struct {
 	row    int
 	column int
 	want   string
@@ -48,8 +48,8 @@ func TestHeader(t *testing.T) {
 	}
 }
 
-func TestMoveCursonCases(t *testing.T) {
-	for _, test := range testMoveCursonCases {
+func TestMoveCursorCases(t *testing.T) {
+	for _, test := range testMoveCursorCases {
 		if got := moveCursor(test.row, test.column); got != test.want {
 			t.Fatalf("moveCursor(row=%d, column=%d) Want: %q Got: %q\n", test.row, test.column, test.want, got)
 		}

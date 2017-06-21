@@ -103,7 +103,7 @@ func (s *Song) printHeaders() (out string) {
 func (s *Song) playStep(step int) (out string, column int, dur float64) {
 	var headerLength = 10
 
-	// normilze step over maximum pattern length
+	// normalize step over maximum pattern length
 	maxDur := s.MaxPatDur()
 	stepNorm := step % maxDur
 	if stepNorm == 0 {
