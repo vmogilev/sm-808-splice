@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
 	"sort"
+	"time"
 )
 
 // Pattern - a pattern can be added to a song, each pattern can have
@@ -83,13 +83,13 @@ func (s *Song) AddPattern(name string, beats map[int]int, file string) {
 }
 
 // Play - prints/plays all patterns at specific step of a song
-func (s *Song) Play(step int) (out string, column int) {
+func (s *Song) Play(step int) (out string, column int, dur float64) {
 	if step == 1 {
 		out = s.printHeaders()
 	}
 
-	beats, column := s.playStep(step)
-	return out + beats, column
+	beats, column, dur := s.playStep(step)
+	return out + beats, column, dur
 }
 
 func (s *Song) printHeaders() (out string) {
@@ -100,7 +100,7 @@ func (s *Song) printHeaders() (out string) {
 	return out
 }
 
-func (s *Song) playStep(step int) (out string, column int) {
+func (s *Song) playStep(step int) (out string, column int, dur float64) {
 	var headerLength = 10
 
 	// normilze step over maximum pattern length
@@ -142,6 +142,9 @@ func (s *Song) playStep(step int) (out string, column int) {
 		column = headerLength + (2 * stepNorm) - 1
 	}
 
+	dur = (((60.0 / float64(s.Tempo)) * 4.0) / 8.0)
+	microSecs := time.Duration(dur*1000000) * time.Microsecond
+
 	var lastRow int
 	var xOrUnderscore string
 	for row, pat := range s.Patterns {
@@ -151,9 +154,9 @@ func (s *Song) playStep(step int) (out string, column int) {
 		}
 		if _, ok := pat.Beats[key]; ok {
 			xOrUnderscore = "X"
-			if pat.File != "" {
-				play("beats" + string(filepath.Separator) + pat.File)
-			}
+			// if pat.File != "" {
+			// 	play("beats" + string(filepath.Separator) + pat.File)
+			// }
 		} else {
 			xOrUnderscore = "_"
 		}
@@ -181,5 +184,6 @@ func (s *Song) playStep(step int) (out string, column int) {
 	maxColumns := headerLength + (2 * maxDur)
 	head := header(column-1, stepNorm)
 	foot := footer(maxColumns, column, lastRow+2)
-	return head + out + foot, column
+	time.Sleep(microSecs)
+	return head + out + foot, column, dur
 }

@@ -150,7 +150,7 @@ var testSongPlayCases = []struct {
 
 func TestSongPlay(t *testing.T) {
 	for _, test := range testSongPlayCases {
-		if got, _ := test.song.Play(test.step); got != test.want {
+		if got, _, _ := test.song.Play(test.step); got != test.want {
 			t.Fatalf("song.Play(step=%d) Want: %q Got: %q", test.step, test.want, got)
 		}
 	}
