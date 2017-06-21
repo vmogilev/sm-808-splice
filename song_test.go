@@ -131,7 +131,7 @@ var testSongPlayCases = []struct {
 			},
 		},
 		1,
-		"          \n   Kick: |\n  Snare: |\n  HiHat: |\n\033[1;10H 1 \033[2;11HX|\033[3;11H_|\033[4;11H_|\033[5;1H          *               ",
+		"\033[1;1H          \n\033[2;1H   Kick: |\n\033[3;1H  Snare: |\n\033[4;1H  HiHat: |\n\033[1;10H 1 \033[2;11HX|\033[3;11H_|\033[4;11H_|\033[5;1H          *               ",
 	},
 	{
 		&Song{
@@ -174,7 +174,7 @@ func TestSong(t *testing.T) {
 
 func TestPatterns(t *testing.T) {
 	for _, test := range testPatternCases {
-		test.songIn.AddPattern(test.name, test.beats)
+		test.songIn.AddPattern(test.name, test.beats, "")
 		if !reflect.DeepEqual(test.songIn, test.songOut) {
 			t.Fatalf("In: %v\nGot: %v\nWant: %v", test, test.songIn, test.songOut)
 		}

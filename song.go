@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 )
 
@@ -54,7 +55,7 @@ func (s *Song) MaxPatDur() int {
 }
 
 // AddPattern - adds a specific beat pattern to existing song
-func (s *Song) AddPattern(name string, beats map[int]int) {
+func (s *Song) AddPattern(name string, beats map[int]int, file string) {
 	keys := make([]int, len(beats))
 	i := 0
 	for k := range beats {
@@ -76,6 +77,7 @@ func (s *Song) AddPattern(name string, beats map[int]int) {
 		Name:     name,
 		Beats:    beats,
 		Duration: duration,
+		File:     file,
 	}
 	s.Patterns = append(s.Patterns, pat)
 }
@@ -91,9 +93,9 @@ func (s *Song) Play(step int) (out string, column int) {
 }
 
 func (s *Song) printHeaders() (out string) {
-	out = fmt.Sprintf("%7s   \n", " ")
-	for _, pat := range s.Patterns {
-		out += fmt.Sprintf("%7s: |\n", pat.Name)
+	out = fmt.Sprintf("%s%7s   \n", moveCursor(1, 1), " ")
+	for i, pat := range s.Patterns {
+		out += fmt.Sprintf("%s%7s: |\n", moveCursor(i+2, 1), pat.Name)
 	}
 	return out
 }
@@ -149,6 +151,9 @@ func (s *Song) playStep(step int) (out string, column int) {
 		}
 		if _, ok := pat.Beats[key]; ok {
 			xOrUnderscore = "X"
+			if pat.File != "" {
+				play("beats" + string(filepath.Separator) + pat.File)
+			}
 		} else {
 			xOrUnderscore = "_"
 		}

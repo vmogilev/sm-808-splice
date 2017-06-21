@@ -32,19 +32,19 @@ func main() {
 
 	song := NewSong(title, bpm)
 	kick := map[int]int{1: 1, 5: 1}
-	snare := map[int]int{5: 1}
+	snare := map[int]int{5: 1, 13: 1}
 	hihat := map[int]int{3: 1, 7: 1}
-	hitom := map[int]int{6: 1, 12: 1, 16: 1}
-	song.AddPattern("Kick", kick)
-	song.AddPattern("Snare", snare)
-	song.AddPattern("HiHat", hihat)
-	song.AddPattern("HiTom", hitom)
+	//hitom := map[int]int{6: 1, 12: 1, 16: 1}
+	song.AddPattern("Kick", kick, "Kick.aif")
+	song.AddPattern("Snare", snare, "Snare.aif")
+	song.AddPattern("HiHat", hihat, "HiHat.aif")
+	//song.AddPattern("HiTom", hitom)
 
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
 	cmd.Run()
 
-	for i := 1; i <= song.MaxPatDur()*4; i++ {
+	for i := 1; i <= song.MaxPatDur()*2; i++ {
 		beats, column := song.Play(i)
 		fmt.Printf("%s", beats)
 		fmt.Printf("\n\n>> Step: %d\n", i)
