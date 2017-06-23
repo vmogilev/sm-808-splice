@@ -6,9 +6,9 @@ import "fmt"
 type exception string
 
 var excepErrors = map[exception]string{
-	"tempoRange":       "Tempo range should be between 60 and 128 BPM",
-	"tempoNotNumber":   "Tempo should be a number",
-	"songTitleTooLong": fmt.Sprintf("Song Title should be less than %d", maxSongTitle),
+	tempoRange:       "Tempo range should be between 60 and 128 BPM",
+	tempoNotNumber:   "Tempo should be a number",
+	songTitleTooLong: fmt.Sprintf("Song Title should be less than %d", maxSongTitle),
 }
 
 const tempoRange = exception("tempoRange")
